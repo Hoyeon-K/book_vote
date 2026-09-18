@@ -1,6 +1,7 @@
 import streamlit as st
 from supabase import create_client
 from datetime import datetime, timezone
+import time
 
 st.set_page_config(page_title="팀 도서 추천 투표", page_icon="📚", layout="centered")
 
@@ -116,16 +117,22 @@ with tab1:
             elif len(filled) < 3:
                 st.warning("책을 최소 3권 이상 입력해주세요.")
             else:
-                rows = [
-                    {
-                        "user_name": user_name,
-                        "book_title": t,
-                        "created_at": datetime.now(timezone.utc).isoformat(),
-                    }
-                    for t in filled
-                ]
-                supabase.table("books").insert(rows).execute()
-                st.success("등록되었습니다!")
+                with st.spinner("도서를 등록하는 중입니다..."):
+                    rows = [
+                        {
+                            "user_name": user_name,
+                            "book_title": t,
+                            "created_at": datetime.now(timezone.utc).isoformat(),
+                        }
+                        for t in filled
+                    ]
+                    supabase.table("books").insert(rows).execute()
+                
+                # 시각 효과: 풍선 애니메이션 & 완료 메시지
+                st.balloons()
+                st.success("🎉 추천 도서 등록이 성공적으로 완료되었습니다!")
+                st.toast("추천 도서가 정상 저장되었습니다.", icon="✅")
+                time.sleep(1.5)
                 st.rerun()
 
 with tab2:
@@ -144,7 +151,7 @@ with tab2:
             )
 
             if not books:
-                st.info("아직 투표할 책이 없습니다.")
+                st.info("아직 투표할 책이 없습니다. (본인이 등록한 도서는 제외됩니다)")
             else:
                 options = {f'{b["book_title"]} — {b["user_name"]}': b["id"] for b in books}
                 selected = st.multiselect(
@@ -157,9 +164,16 @@ with tab2:
                     if not selected:
                         st.warning("최소 1권을 선택해주세요.")
                     else:
-                        rows = [
-                            {"voter_name": user_name, "book_id": options[label]}
-                            for label in selected
-                        ]
-                        supabase.table("votes").insert(rows).execute()
-                        st.success("투표가 완료되었습니다!")
+                        with st.spinner("투표를 저장하는 중입니다..."):
+                            rows = [
+                                {"voter_name": user_name, "book_id": options[label]}
+                                for label in selected
+                            ]
+                            supabase.table("votes").insert(rows).execute()
+                        
+                        # 시각 효과: 풍선 애니메이션 & 완료 메시지
+                        st.balloons()
+                        st.success("🎉 투표가 성공적으로 완료되었습니다!")
+                        st.toast("투표 결과가 정상 집계되었습니다.", icon="🗳️")
+                        time.sleep(1.5)
+                        st.rerun()
