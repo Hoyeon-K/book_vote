@@ -8,50 +8,81 @@ supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
 st.markdown("""
 <style>
+/* 전체 배경 다크 테마 고정 */
 .stApp {
     background: radial-gradient(1000px 600px at 10% -10%, rgba(242,184,75,0.15), transparent 60%),
                 radial-gradient(1000px 700px at 100% 0%, rgba(90,110,220,0.25), transparent 55%),
                 linear-gradient(160deg, #120c26 0%, #1c2a52 100%);
     color: #f5f3ee;
 }
-h1, h2, h3, .stMarkdown p { color: #f5f3ee !important; }
+
+h1, h2, h3, .stMarkdown p, label { 
+    color: #f5f3ee !important; 
+}
+
+/* 카드 컨테이너 스타일 */
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.14);
     border-radius: 20px;
     backdrop-filter: blur(18px);
-    padding: 8px;
+    padding: 12px;
 }
-div[data-testid="stTextInput"] input,
-div[data-testid="stTextArea"] textarea {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
-    color: #f5f3ee !important;
-    -webkit-text-fill-color: #f5f3ee !important;
-    caret-color: #f5f3ee !important;
-    border-radius: 12px !important;
+
+/* 모든 텍스트 입력창 글자색 & 배경색 강제 고정 */
+input, textarea {
+    background-color: #1e1b38 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #f2b84b !important;
+    border: 1px solid rgba(255,255,255,0.25) !important;
+    border-radius: 10px !important;
 }
-div[data-testid="stTextInput"] input::placeholder {
+
+/* 입력창 포커스 시 테두리 강조 */
+input:focus, textarea:focus {
+    border-color: #f2b84b !important;
+    box-shadow: 0 0 0 1px #f2b84b !important;
+}
+
+/* 플레이스홀더(힌트 텍스트) 색상 */
+input::placeholder, textarea::placeholder {
     color: #8b87a6 !important;
     -webkit-text-fill-color: #8b87a6 !important;
 }
-div[data-baseweb="select"] > div {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
-    border-radius: 12px !important;
+
+/* 투표 멀티셀렉트(드롭다운) 박스 스타일 */
+div[data-baseweb="select"] {
+    background-color: #1e1b38 !important;
+    border-radius: 10px !important;
 }
-div[data-baseweb="select"] * ,
-div[data-baseweb="tag"] span {
-    color: #f5f3ee !important;
-    -webkit-text-fill-color: #f5f3ee !important;
+
+div[data-baseweb="select"] * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
+
+/* 선택된 태그(칩) 스타일 */
+div[data-baseweb="tag"] {
+    background-color: #383460 !important;
+}
+
+/* 버튼 스타일 */
 .stButton > button {
-    background: #f2b84b;
-    color: #221703;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
+    background-color: #f2b84b !important;
+    color: #221703 !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    width: 100%;
 }
+
+.stButton > button:hover {
+    background-color: #ffc966 !important;
+    color: #000000 !important;
+}
+
+/* 상단 탭 스타일 */
 .stTabs [data-baseweb="tab-list"] { gap: 8px; }
 .stTabs [data-baseweb="tab"] {
     background: rgba(255,255,255,0.06);
@@ -66,7 +97,7 @@ st.title("📚 팀 도서 추천 투표")
 if "user_name" not in st.session_state:
     st.session_state.user_name = ""
 
-st.session_state.user_name = st.text_input("이름", value=st.session_state.user_name)
+st.session_state.user_name = st.text_input("이름", value=st.session_state.user_name, placeholder="예: 지수")
 user_name = st.session_state.user_name.strip()
 
 tab1, tab2 = st.tabs(["책 추천하기", "투표하기"])
@@ -76,7 +107,7 @@ with tab1:
         st.subheader("추천 도서 등록")
         st.caption("최소 3권, 최대 5권을 입력하세요.")
 
-        titles = [st.text_input(f"책 제목 {i+1}", key=f"book_{i}") for i in range(5)]
+        titles = [st.text_input(f"책 제목 {i+1}", key=f"book_{i}", placeholder=f"책 제목 {i+1}") for i in range(5)]
 
         if st.button("등록하기"):
             filled = [t.strip() for t in titles if t.strip()]
