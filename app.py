@@ -177,3 +177,36 @@ with tab2:
                         st.toast("투표 결과가 정상 집계되었습니다.", icon="🗳️")
                         time.sleep(1.5)
                         st.rerun()
+# 기존 탭 선언부를 3개로 변경
+# tab1, tab2, tab3 = st.tabs(["책 추천하기", "투표하기", "📊 투표 결과 보기"])
+
+with tab3:
+    with st.container(border=True):
+        st.subheader("📊 실시간 투표 집계 현황")
+        
+        # books 테이블과 votes 테이블 데이터를 조인해서 가져오기
+        all_books = supabase.table("books").select("id, book_title, user_name").execute().data
+        all_votes = supabase.table("votes").select("book_id").execute().data
+
+        if not all_books:
+            st.info("등록된 도서가 없습니다.")
+        else:
+            # 득표수 카운트
+            vote_counts = {}
+            for v in all_votes:
+                b_id = v["book_id"]
+                vote_counts[b_id] = vote_counts.get(b_id, 0) + 1
+
+            # 표시용 리스트 정리 (득표수 높은 순 정렬)
+            results = []
+            for b in all_books:
+                results.append({
+                    "책 제목": b["book_title"],
+                    "추천자": b["user_name"],
+                    "득표수": vote_counts.get(b["id"], 0)
+                })
+            
+            results = sorted(results, key=lambda x: x["득표수"], reverse=True)
+            
+            # 표로 깔끔하게 출력
+            st.dataframe(results, use_container_width=True, hide_index=True)
