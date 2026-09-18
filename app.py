@@ -22,12 +22,28 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     backdrop-filter: blur(18px);
     padding: 8px;
 }
-.stTextInput > div > div > input,
-div[data-baseweb="select"] > div {
+div[data-testid="stTextInput"] input,
+div[data-testid="stTextArea"] textarea {
     background: rgba(255,255,255,0.06) !important;
     border: 1px solid rgba(255,255,255,0.18) !important;
     color: #f5f3ee !important;
+    -webkit-text-fill-color: #f5f3ee !important;
+    caret-color: #f5f3ee !important;
     border-radius: 12px !important;
+}
+div[data-testid="stTextInput"] input::placeholder {
+    color: #8b87a6 !important;
+    -webkit-text-fill-color: #8b87a6 !important;
+}
+div[data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    border-radius: 12px !important;
+}
+div[data-baseweb="select"] * ,
+div[data-baseweb="tag"] span {
+    color: #f5f3ee !important;
+    -webkit-text-fill-color: #f5f3ee !important;
 }
 .stButton > button {
     background: #f2b84b;
