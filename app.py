@@ -101,7 +101,8 @@ if "user_name" not in st.session_state:
 st.session_state.user_name = st.text_input("이름", value=st.session_state.user_name, placeholder="예: 지수")
 user_name = st.session_state.user_name.strip()
 
-tab1, tab2 = st.tabs(["책 추천하기", "투표하기"])
+# 탭 3개로 선언 (추천하기, 투표하기, 결과 보기)
+tab1, tab2, tab3 = st.tabs(["책 추천하기", "투표하기", "📊 투표 결과 보기"])
 
 with tab1:
     with st.container(border=True):
@@ -128,7 +129,6 @@ with tab1:
                     ]
                     supabase.table("books").insert(rows).execute()
                 
-                # 시각 효과: 풍선 애니메이션 & 완료 메시지
                 st.balloons()
                 st.success("🎉 추천 도서 등록이 성공적으로 완료되었습니다!")
                 st.toast("추천 도서가 정상 저장되었습니다.", icon="✅")
@@ -171,33 +171,27 @@ with tab2:
                             ]
                             supabase.table("votes").insert(rows).execute()
                         
-                        # 시각 효과: 풍선 애니메이션 & 완료 메시지
                         st.balloons()
                         st.success("🎉 투표가 성공적으로 완료되었습니다!")
                         st.toast("투표 결과가 정상 집계되었습니다.", icon="🗳️")
                         time.sleep(1.5)
                         st.rerun()
-# 기존 탭 선언부를 3개로 변경
-# tab1, tab2, tab3 = st.tabs(["책 추천하기", "투표하기", "📊 투표 결과 보기"])
 
 with tab3:
     with st.container(border=True):
         st.subheader("📊 실시간 투표 집계 현황")
         
-        # books 테이블과 votes 테이블 데이터를 조인해서 가져오기
         all_books = supabase.table("books").select("id, book_title, user_name").execute().data
         all_votes = supabase.table("votes").select("book_id").execute().data
 
         if not all_books:
             st.info("등록된 도서가 없습니다.")
         else:
-            # 득표수 카운트
             vote_counts = {}
             for v in all_votes:
                 b_id = v["book_id"]
                 vote_counts[b_id] = vote_counts.get(b_id, 0) + 1
 
-            # 표시용 리스트 정리 (득표수 높은 순 정렬)
             results = []
             for b in all_books:
                 results.append({
@@ -206,7 +200,6 @@ with tab3:
                     "득표수": vote_counts.get(b["id"], 0)
                 })
             
+            # 득표수 높은 순 정렬
             results = sorted(results, key=lambda x: x["득표수"], reverse=True)
-            
-            # 표로 깔끔하게 출력
             st.dataframe(results, use_container_width=True, hide_index=True)
